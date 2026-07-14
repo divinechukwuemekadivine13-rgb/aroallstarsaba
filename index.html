@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aro All Stars Aba Branch Football Academy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>⚽ Aro All Stars Aba Branch Football Academy</h1>
+    <nav>
+      <button onclick="showForm('player')">Player Registration</button>
+      <button onclick="showForm('coach')">Coach Login</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Player Registration Form -->
+    <section id="playerForm" class="form-box">
+      <h2>Join The Academy</h2>
+      <form onsubmit="registerPlayer(event)">
+        <input type="text" id="pName" placeholder="Full Name" required>
+        <input type="number" id="pAge" placeholder="Age" required>
+        <input type="text" id="pPosition" placeholder="Playing Position" required>
+        <input type="tel" id="pPhone" placeholder="Phone Number" required>
+        <input type="email" id="pEmail" placeholder="Email" required>
+        <button type="submit">Submit Application</button>
+      </form>
+      <p id="playerMsg"></p>
+    </section>
+
+    <!-- Coach Login Form -->
+    <section id="coachForm" class="form-box" style="display:none;">
+      <h2>Coach Admin Login</h2>
+      <form onsubmit="coachLogin(event)">
+        <input type="password" id="coachPass" placeholder="Enter Admin Password" required>
+        <button type="submit">Login</button>
+      </form>
+
+      <div id="coachDashboard" style="display:none;">
+        <h3>Registered Players</h3>
+        <button onclick="exportData()">Export to CSV</button>
+        <table id="playersTable">
+          <thead>
+            <tr><th>Name</th><th>Age</th><th>Position</th><th>Phone</th><th>Email</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button onclick="logoutCoach()">Logout</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 Aro All Stars Aba Football Academy | Aba, Nigeria</p>
+  </footer>
+
+  <script>
+    const COACH_PASSWORD = "coach"; // Change this
+
+    function showForm(type) {
+      document.getElementById('playerForm').style.display = type === 'player'? 'block' : 'none';
+      document.getElementById('coachForm').style.display = type === 'coach'? 'block' : 'none';
+    }
+
+    function registerPlayer(e) {
+      e.preventDefault();
+      let players = JSON.parse(localStorage.getItem('players')) || [];
+      let newPlayer = {
+        name: document.getElementById('pName').value,
+        age: document.getElementById('pAge').value,
+        position: document.getElementById('pPosition').value,
+        phone: document.getElementById('pPhone').value,
+        email: document.getElementById('pEmail').value,
+        date: new Date().toLocaleString()
+      };
+      players.push(newPlayer);
+      localStorage.setItem('players', JSON.stringify(players));
+      document.getElementById('playerMsg').innerText = "Application submitted! Coach will contact you.";
+      e.target.reset();
+    }
+
+    function coachLogin(e) {
+      e.preventDefault();
+      let pass = document.getElementById('coachPass').value;
+      if(pass === COACH_PASSWORD)
+      
+      {
+        document.getElementById('coachDashboard').style.display = 'block';
+        loadPlayers();
+      } else {
+        alert("Wrong password!");
+      }
+    }
+
+    function loadPlayers() {
+      let players = JSON.parse(localStorage.getItem('players')) || [];
+      let tbody = document.querySelector('#playersTable tbody');
+      tbody.innerHTML = "";
+      players.forEach(p => {
+        tbody.innerHTML += `<tr><td>${p.name}</td><td>${p.age}</td><td>${p.position}</td><td>${p.phone}</td><td>${p.email}</td></tr>`;
+      });
+    }
+
+    function exportData() {
+      let players = JSON.parse(localStorage.getItem('players')) || [];
+      let csv = "Name,Age,Position,Phone,Email,Date\n";
+      players.forEach(p => csv += `${p.name},${p.age},${p.position},${p.phone},${p.email},${p.date}\n`);
+      let blob = new Blob([csv], {type: 'text/csv'});
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url; a.download = "players.csv"; a.click();
+    }
+
+    function logoutCoach() {
+      document.getElementById('coachDashboard').style.display = 'none';
+      document.getElementById('coachPass').value = "";
+    }
+  </script>
+</body>
+</html>
